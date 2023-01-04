@@ -15,6 +15,8 @@ class Blog extends Controller
         if( ! empty($list)) {
             foreach ($list as &$v) {
                 $v->url = '/blog/' . $v->keyword;
+                $v->img = asset($v->img);
+                $v->short_desc = strip_tags(str_limit($v->text, 120, '...'));
             } unset($v);
         }
 
@@ -30,6 +32,14 @@ class Blog extends Controller
         $list = Post::where([
             ['cat_id', '=', $category->id],
         ])->orderBy('id', 'desc')->paginate(12);
+
+        if( ! empty($list)) {
+            foreach ($list as &$v) {
+                $v->url = '/blog/' . $v->keyword;
+                $v->img = asset($v->img);
+                $v->short_desc = strip_tags(str_limit($v->text, 120, '...'));
+            } unset($v);
+        }
 
         $menu = $this->menu();
 

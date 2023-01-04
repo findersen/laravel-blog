@@ -14,13 +14,34 @@ class PostCategoryObserver
      */
     public function saving(PostCategory $postCategory)
     {
-        $postCategory->keyword = str_slug($postCategory->title);
+        $slug = str_slug($postCategory->title);
+        $title = $postCategory->title;
+        $i = 1;
+
+        do {
+            $check = PostCategory::where([
+                ['keyword', '=', $slug],
+                ['id', '<>', $postCategory->id],
+            ])->first();
+
+            if( ! empty($check)) {
+                $slug = str_slug($postCategory->title) .'-'. $i;
+                $title = $postCategory->title .' '. $i;
+                $i += 1;
+            }
+        } while($check);
+
+        $postCategory->keyword = $slug;
+        $postCategory->title = $title;
+
         if(empty($postCategory->meta_title)) {
             $postCategory->meta_title = $postCategory->title;
         }
+
         if(empty($postCategory->h1_title)) {
             $postCategory->h1_title = $postCategory->title;
         }
+
         if(empty($postCategory->meta_description)) {
             $postCategory->meta_description = str_limit($postCategory->seo_text, 80, '...');
         }

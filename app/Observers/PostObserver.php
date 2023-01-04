@@ -14,7 +14,33 @@ class PostObserver
      */
     public function saving(Post $post)
     {
-        $post->keyword = str_slug($post->title);
+        $slug = str_slug($post->title);
+        $title = $post->title;
+        $i = 1;
+
+        do {
+            $check = Post::where([
+                ['keyword', '=', $slug],
+                ['id', '<>', $post->id],
+            ])->first();
+
+            if( ! empty($check)) {
+                $slug = str_slug($post->title) .'-'. $i;
+                $title = $post->title .' '. $i;
+                $i += 1;
+            }
+        } while($check);
+
+        $post->keyword = $slug;
+        $post->title = $title;
+
+        if(empty($post->meta_title)) {
+            $post->meta_title = $post->title;
+        }
+        if(empty($post->meta_description)) {
+            $description = str_limit($post->text, 140, '...');
+            $post->meta_description = strip_tags($description);
+        }
     }
 
     /**
